@@ -22,8 +22,8 @@ void get_line(char* line,FILE* file)
 
 void solve(map<char*,char*> &ma)
 {
-	char name[LENGTH];
-	char ip[LENGTH/4];
+//	char name[LENGTH];
+//	char ip[LENGTH/4];
 	char line[LENGTH];
 	char tmp[11];
 
@@ -36,6 +36,8 @@ void solve(map<char*,char*> &ma)
 	
 	while(line[i] != EOF)
 	{
+		char name[LENGTH];
+		char ip[LENGTH/4];
 		get_line(line,file);
 		if (line[0] == EOF)
 			break;
