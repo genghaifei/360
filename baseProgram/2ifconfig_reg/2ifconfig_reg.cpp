@@ -5,7 +5,7 @@
 const int LENGTH = 1024;
 using namespace std;
 
-void get_line(char* line,FILE* file)
+void get_line(string line,FILE* file)
 {
 	int i = 0;
 	while(1)
@@ -20,14 +20,24 @@ void get_line(char* line,FILE* file)
 }
 
 
-void solve(map<char*,char*> &ma)
+void printlog(map<string,string> ma,map<string,string>::iterator lt)
+{
+	cout<<ma.size()<<endl;
+	for (lt = ma.begin();lt != ma.end();lt++)
+	{
+		cout<<(*lt).first<<" "<<(*lt).second<<endl;
+	}
+}
+
+void solve(map<string,string> &ma)
 {
 //	char name[LENGTH];
 //	char ip[LENGTH/4];
-	char line[LENGTH];
-	char tmp[11];
+	string line;
+	string tmp;
 
-	pair<map<char*,char*>::iterator,bool> insert_pair;
+	map<string,string>::iterator lt;
+	//pair<map<string,string>::iterator,bool> insert_pair;
 
 	FILE *file = popen("ifconfig","r");
 	if (!file)
@@ -36,8 +46,8 @@ void solve(map<char*,char*> &ma)
 	
 	while(line[i] != EOF)
 	{
-		char name[LENGTH];
-		char ip[LENGTH/4];
+		string name;
+		string ip;
 		get_line(line,file);
 		if (line[0] == EOF)
 			break;
@@ -66,7 +76,7 @@ void solve(map<char*,char*> &ma)
 		}
 		tmp[t] = '\0';
 
-		if(strcasecmp("inet addr:",tmp) == 0)
+		if(strcasecmp("inet addr:",tmp.c_str()) == 0)
 		{
 			while(line[i] != ' ')
 			{
@@ -79,11 +89,12 @@ void solve(map<char*,char*> &ma)
 		i = 0;
 		j = 0;
 
-		insert_pair = ma.insert(pair<char*,char*>(name,ip));
-		if(insert_pair.second == true)
-			cout<<"insert successfully"<<endl;
-		else
-			cout<<"insert failed"<<endl;
+	    ma.insert(pair<string,string>(name,ip));
+//		if(insert_pair.second == true)
+//			cout<<"insert successfully"<<endl;
+//		else
+//			cout<<"insert failed"<<endl;
+		printlog(ma,lt);
 		while(1)
 		{
 			get_line(line,file);
@@ -95,15 +106,12 @@ void solve(map<char*,char*> &ma)
 	}
 }
 
+
 int main()
 {
-	map<char*,char*> ma;
+	map<string,string> ma;
 	solve(ma);
-	map<char*,char*>::iterator lt;
 	cout<<ma.size()<<endl;
-	for (lt = ma.begin();lt != ma.end();lt++)
-	{
-		cout<<(*lt).first<<" "<<(*lt).second<<endl;
-	}
+
 	return 0;
 }
