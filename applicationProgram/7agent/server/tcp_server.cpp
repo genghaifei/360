@@ -72,7 +72,7 @@ void* _accept(void* sock)
 	printf("get new client\n");
 	pthread_detach(pthread_self());
 	int clientfd = (int)sock;
-	clientfd = set_sock_noblock(clientfd);
+//	clientfd = set_sock_noblock(clientfd);
 	char buf[BUFFER_SIZE];
 	char line[BUFFER_SIZE];
 	while(1)
@@ -127,6 +127,7 @@ int main()
 	assert(listenfd > 0);
 	
 	set_sock_reuse_port(listenfd);
+	listenfd = set_sock_noblock(listenfd);
 	struct sockaddr_in address;
 	bzero(&address,sizeof(address));
 	address.sin_family = AF_INET;

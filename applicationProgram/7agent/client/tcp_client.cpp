@@ -25,7 +25,7 @@ int set_sock_noblock(int sock)
 }
 void get_message(int clientfd)
 {
-	clientfd = set_sock_noblock(clientfd);
+	//clientfd = set_sock_noblock(clientfd);
 	char buf[BUFFER_SIZE];
 	char recvm[BUFFER_SIZE];
 	int ret = 0;
@@ -64,6 +64,7 @@ int main(int argc,char *argv[])
 	int listenfd = socket(AF_INET,SOCK_STREAM,0);
 	assert(listenfd >0);
 
+	listenfd = set_sock_noblock(listenfd);
 	struct sockaddr_in client;
 	bzero(&client,sizeof(client));
 	client.sin_family = AF_INET;
