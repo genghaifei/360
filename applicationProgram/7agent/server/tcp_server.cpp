@@ -25,29 +25,84 @@ int get_line(int clientfd,char *buf,int len)
 		recv(clientfd,&buf[i],1,0);
 		if (buf[i] == '\n')
 			break;
+		if (buf[i] == '\0')
+			break;
 	}
 	return i;
 }
+
+int  get_line2(char *line,int len,FILE *fp)
+{
+	int i = 0;
+	char buf;
+	while(i < len-1)
+	{
+		line[i] = fgetc(fp);
+		if (line[i] == EOF)
+		{
+			break;
+		}
+		if (line[i] == NULL)
+		{
+			break;
+		}
+		if (line[i] == '\n')
+		{
+			line[i+1] = '\0';
+			return i+2;
+		}
+		i++;
+	}
+	if (i == 0)
+		return 0;
+	if (i == len-1)
+		line[i] = '\0';
+	return len;
+}
+
+int set_sock_noblock(int sock)
+{
+	int length = 0;
+	setsockopt(sock,SOL_SOCKET,SO_SNDBUF,(void*)&length,sizeof(length));
+	return sock;
+}
+
 void* _accept(void* sock)
-{	
+{
+	printf("get new client\n");
+	pthread_detach(pthread_self());
 	int clientfd = (int)sock;
+	clientfd = set_sock_noblock(clientfd);
 	char buf[BUFFER_SIZE];
-	char line;
+	char line[BUFFER_SIZE];
 	while(1)
 	{
+		printf("enter while loop\n");
+		
 		int size = get_line(clientfd,buf,sizeof(buf));
-		if (strcasecmp("quit",buf) == 0)
+		printf("get line success\n");
+		if (strncasecmp("quit",buf,4) == 0)
 			break;
 		if(size == 0)
 			continue;
 		FILE* fp = popen(buf,"r");
+		if (fp == NULL)
+			exit(1);
+		printf("popen success\n");
+		int num = 0;
 		while(1)
 		{
-			line = fgetc(fp);
-			if (line == EOF)
+			num = get_line2(line,BUFFER_SIZE,fp);
+			printf("get_line2 success buf is %s\n",line);
+			if (num == 0)
+			{
+				line[0] = (char)62;
+				send(clientfd,line,1,0);
 				break;
-			send(clientfd,&line,1,0);
+			}
+			send(clientfd,line,num,0);
 		}
+		printf("one command success\n");
 		fclose(fp);
 
 	}
@@ -55,13 +110,23 @@ void* _accept(void* sock)
 	
 }
 
+
+void  set_sock_reuse_port(int listenfd)
+{
+	int flag = 1;
+	setsockopt(listenfd,SOL_SOCKET,SO_REUSEADDR,&flag,sizeof(flag));
+}
+
+
+
 int main()
 {
-	daemon(0,0);
+	//daemon(0,0);
 	int port = 8888;
 	int listenfd = socket(AF_INET,SOCK_STREAM,0);
 	assert(listenfd > 0);
-
+	
+	set_sock_reuse_port(listenfd);
 	struct sockaddr_in address;
 	bzero(&address,sizeof(address));
 	address.sin_family = AF_INET;
